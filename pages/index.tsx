@@ -1,49 +1,21 @@
-import {GetServerSideProps} from 'next';
-import {useEffect} from 'react';
-import initMiro from '../initMiro';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import Table from "../src/components/Table";
 
-import congratulations from '../src/assets/congratulations.png';
 
-export const getServerSideProps: GetServerSideProps =
-  async function getServerSideProps({req}) {
-    const {miro} = initMiro(req);
+// async function addSticky() {
+//   const stickyNote = await miro.board.createStickyNote({
+//     content: 'Hello, World!',
+//   });
+//
+//   await miro.board.viewport.zoomTo(stickyNote);
+// }
 
-    // redirect to auth url if user has not authorized the app
-    if (!(await miro.isAuthorized(''))) {
-      return {
-        props: {
-          boards: [],
-          authUrl: miro.getAuthUrl(),
-        },
-      };
-    }
+export default function Main() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [spaces, setSpaces] = useState([]);
 
-    const api = miro.as('');
-
-    const boards: string[] = [];
-
-    for await (const board of api.getAllBoards()) {
-      boards.push(board.name || '');
-    }
-
-    return {
-      props: {
-        boards,
-      },
-    };
-  };
-
-export default function Main({
-  boards,
-  authUrl,
-}: {
-  boards: string[];
-  authUrl?: string;
-}) {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).has('panel')) return;
-
     window.miro.board.ui.on('icon:click', async () => {
       window.miro.board.ui.openPanel({
         url: `/?panel=1`,
@@ -51,48 +23,45 @@ export default function Main({
     });
   }, []);
 
-  if (authUrl) {
+  // On Page Load
+  useEffect(() => {
+    fetch("api/authenticate")
+        .then((response) => response.json())
+        .then((result) => {
+          console.log('authenticate-result', JSON.stringify(result, null, 2));
+          setAuthenticated(result.authenticated)
+        });
+  }, []);
+
+  useEffect(() => {
+    fetch("api/confluence/fetchSpaces")
+        .then((response) => response.json())
+        .then((result) => {
+          console.log('result', JSON.stringify(result, null, 2));
+          setSpaces(result.spaces.results)
+        });
+  }, [authenticated]);
+
+
+  if (!authenticated) {
     return (
-      <div className="grid wrapper">
-        <div className="cs1 ce12">
-          <a className="button button-primary" href={authUrl}>
-            Login
-          </a>
+        <div className="grid wrapper">
+          <div className="cs1 ce12">
+            <button className="button bg-blue" type="button" onClick={() => window.open(`/api/signin`, '_blank')}>
+              <span className="icon-eye"></span>
+              Login
+            </button>
+          </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="grid wrapper">
-      <div className="cs1 ce12">
-        <Image src={congratulations} alt="Congratulations text" />
+      <div className="grid wrapper">
+        {/*Display all spaces */}
+        <div className="cs1 ce12">
+          <Table title='Spaces' description='A list of all the spaces in your instance including their id, key, and name.' spaces={spaces}/>
+        </div>
       </div>
-      <div className="cs1 ce12">
-        <h1>Congratulations!</h1>
-        <p>You've just created your first Miro app!</p>
-        <p>This is a list of all the boards that your user has access to:</p>
-
-        <ul>
-          {boards.map((board, idx) => (
-            <li key={idx}>{board}</li>
-          ))}
-        </ul>
-
-        <p>
-          To explore more and build your own app, see the Miro Developer
-          Platform documentation.
-        </p>
-      </div>
-      <div className="cs1 ce12">
-        <a
-          className="button button-primary"
-          target="_blank"
-          href="https://developers.miro.com"
-        >
-          Read the documentation
-        </a>
-      </div>
-    </div>
   );
 }
