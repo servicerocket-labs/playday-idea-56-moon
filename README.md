@@ -1,6 +1,14 @@
-## Create a Miro app
+## Confluence page tree to Miro board diagram  AKA (CPTM)
+[IDEA-56](https://rocketeers.atlassian.net/jira/polaris/projects/IDEA/ideas/view/2519488?selectedIssue=IDEA-56&atlOrigin=eyJpIjoiY2U1MGEyNDFiMzE0NGQ1MTgwMjE2YjdmMTE4NGMxYzYiLCJwIjoiaiJ9)
 
-### How to start locally
+## Getting Ready
+
+1. [Node.js](https://nodejs.org) and [pnpm](https://pnpm.io) are required.
+2. This app is using [MongoDB](https://www.mongodb.com/docs/manual/installation/) 
+and [here to install to docker](https://www.mongodb.com/docs/v7.0/tutorial/install-mongodb-community-with-docker/)
+
+
+## Getting Started
 
 1. [Sign in](https://miro.com/login/) to Miro, and then create a
    [Developer team](https://developers.miro.com/docs/create-a-developer-team)
@@ -30,10 +38,21 @@
 
 4. Open the [`.env`](.env) file, and enter the app client ID and client secret
    values that you saved at the beginning of step 3 above.
-5. Run `npm start` to start developing.
 
-When your server is up and running:
+5. [Sign in](https://developer.atlassian.com/) to Atlassian developer console. and create an OAuth 2.0 integration.
+![Alt create OAuth 2.0 integration](src/assets/Screenshot%202023-09-25%20at%2011.05.47.png)
 
-- Go to [Miro.com](https://miro.com).
-- In your developer team, open a board.
-- To start your app, click the app icon in the app toolbar on the left.
+6. Go to **Permissions**, and grant confluence permissions as needed:
+![Alt OAth 2.0 App Permission](src/assets/Screenshot%202023-09-25%20at%2011.07.49.png)
+
+7. Go to **Authorization**, and configure your OAuth app
+![Alt OAth 2.0 App Authorization](src/assets/Screenshot%202023-09-25%20at%2011.08.01.png)
+And
+![Alt OAth 2.0 App Authorization config page](src/assets/Screenshot%202023-09-25%20at%2011.08.14.png)
+
+8. Go to **Settings**, and collect your OAuth app `client ID` and `secret`
+![Alt OAth 2.0 App Settings](src/assets/Screenshot%202023-09-25%20at%2011.08.28.png)
+
+9. Run `pnpm start` to start developing.
+
+
