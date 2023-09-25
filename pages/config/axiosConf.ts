@@ -20,7 +20,7 @@ export const authData = () => {
     "redirect_uri": "http://localhost:3000/api/redirect"
   });
 }
-export const headers =  (access_token: string): any => {
+export const headers = (access_token: string | null): any => {
   return {
     'Authorization': `Bearer ${access_token}`,
     'Content-Type': 'application/json'

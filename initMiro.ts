@@ -1,8 +1,8 @@
 import {Miro} from '@mirohq/miro-api';
 import {serialize} from 'cookie';
 
-function getSerializedCookie(name: string, value: string) {
-  return serialize(name, value, {
+function getSerializedCookie(name: string, value: string | undefined) {
+  return serialize(name, <string>value, {
     path: '/',
     httpOnly: true,
     sameSite: 'none',

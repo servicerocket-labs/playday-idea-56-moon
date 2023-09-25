@@ -1,12 +1,12 @@
 import axios from "axios";
-import { serialize } from "cookie";
 import {NextApiRequest, NextApiResponse} from 'next';
 import {data} from "../config/axiosConf";
+import {storeAccessToken} from "../../src/utils/db/services/AccessToken";
 
 // handle redirect with code and exchange it for the access token
 export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
+    req: NextApiRequest,
+    res: NextApiResponse,
 ) {
   let access_token;
 
@@ -18,8 +18,9 @@ export default async function handler(
       headers: {
         'Content-Type': 'application/json'
       },
-      data : data(req.query.code)
+      data: data(req.query.code)
     };
+
     async function grabToken() {
       try {
         let oauthResponse = await axios.request(config);
@@ -27,21 +28,14 @@ export default async function handler(
         access_token = oauthResponse.data.access_token;
 
         if (access_token) {
-          res
-            .setHeader("Set-Cookie", [
-              serialize("miro_access_token", access_token, {
-                httpOnly: true,
-                sameSite: "none",
-                secure: true,
-                maxAge: 3600,
-              }),
-            ]);
+          await storeAccessToken(access_token)
           res.send('<script>window.close();</script>');
         }
       } catch (err) {
         console.log(`ERROR: ${err}`);
       }
     }
+
     return grabToken();
   }
 }

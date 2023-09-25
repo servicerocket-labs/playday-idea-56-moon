@@ -1,14 +1,36 @@
 import { useState, useEffect } from "react";
 import Table from "../src/components/Table";
+import {GetServerSideProps} from "next";
+import initMiro from "../initMiro";
 
+export const getServerSideProps: GetServerSideProps =
+    async function getServerSideProps({req}) {
+      const {miro} = initMiro(req);
 
-// async function addSticky() {
-//   const stickyNote = await miro.board.createStickyNote({
-//     content: 'Hello, World!',
-//   });
-//
-//   await miro.board.viewport.zoomTo(stickyNote);
-// }
+      // redirect to auth url if user has not authorized the app
+      if (!(await miro.isAuthorized(''))) {
+        return {
+          props: {
+            boards: [],
+            authUrl: miro.getAuthUrl(),
+          },
+        };
+      }
+
+      const api = miro.as('');
+
+      const boards: string[] = [];
+
+      for await (const board of api.getAllBoards()) {
+        boards.push(board.name || '');
+      }
+
+      return {
+        props: {
+          boards,
+        },
+      };
+    };
 
 export default function Main() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -25,21 +47,20 @@ export default function Main() {
 
   // On Page Load
   useEffect(() => {
-    fetch("api/authenticate")
+    fetch("api/authenticate", {credentials: "include"})
         .then((response) => response.json())
         .then((result) => {
-          console.log('authenticate-result', JSON.stringify(result, null, 2));
           setAuthenticated(result.authenticated)
         });
   }, []);
 
   useEffect(() => {
-    fetch("api/confluence/fetchSpaces")
+    fetch("api/confluence/fetchSpaces", {credentials: "include"})
         .then((response) => response.json())
         .then((result) => {
-          console.log('result', JSON.stringify(result, null, 2));
           setSpaces(result.spaces.results)
         });
+
   }, [authenticated]);
 
 
